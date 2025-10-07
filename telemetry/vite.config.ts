@@ -12,9 +12,7 @@ export default defineConfig(({ mode }) => ({
     }
   },
   define: {
-    TELEMETRY_URL: JSON.stringify(
-      "https://oxcaml-tutorial.gavinleroy.com/logs"
-    ),
+    TELEMETRY_URL: JSON.stringify("http://oxcaml-tutorial.gavinleroy.com/log"),
     "process.env.NODE_ENV": JSON.stringify(mode)
   }
 }));
