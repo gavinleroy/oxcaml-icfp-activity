@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "target": "es2022",
+    "declaration": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "outDir": "dist"
+  },
+  "include": [
+    "src"
+  ],
+  "typedocOptions": {
+    "entryPoints": [
+      "./src/lib.ts"
+    ]
+  }
+}

@@ -1,0 +1,187 @@
+[[questions]]
+type = "MultipleChoice"
+prompt.prompt = """
+```ocaml
+type user = {
+  id : Uuid.t;
+  mutable last_active : float
+}
+```
+
+Provided the above definition of the `user` type, select all of the programs that type check, or "None of the above."
+"""
+prompt.distractors = ["""
+  ```ocaml
+  let foo (users : user array @ contended) =
+    users.(0)
+  ```
+  """, """
+  ```ocaml
+  let foo (users : user array @ contended) =
+    users.(0).last_active
+  ```
+  """, """
+  ```ocaml
+  let foo (users : user array @ contended) =
+    users.(0).id
+  ```
+  """, """
+  ```ocaml
+  let foo (users : user array @ contended) =
+    users.(0) <- { id = id ; last_active = Unix.time () }
+  ```
+  """, """
+  ```ocaml
+  let foo (users : user array @ contended) =
+    users.(0).last_active <- Unix.time ()
+  ```
+  """]
+answer.answer = ["None of the above"]
+context = """
+Array elements are mutable places, thus elements of a contended array cannot be *read or written*
+"""
+id = "c2edce26-8958-44f1-b155-2b32da8d3bd0"
+
+[[questions]]
+type = "MultipleChoice"
+prompt.prompt = """
+```ocaml
+let make_box s = exclave_
+  ref s
+
+let () = 
+  let ls = [ ref 0 ] in
+  let ls @ local = stack_ (make_box 1 :: ls)  in
+  (* here *)
+  ...
+```
+
+Select which diagram best represents the memory while executing the line marked `(* here *)`
+"""
+prompt.distractors = [
+  "![Maybe answer](assets/q2-memory-b.svg)",
+  "![Maybe answer](assets/q2-memory-c.svg)",
+  "![Maybe answer](assets/q2-memory-d.svg)",
+]
+answer.answer = "![Maybe answer](assets/q2-memory-a.svg)"
+context = """
+The expression `[ ref 0 ]` is not stack allocated.
+"""
+id = "b291663a-1d05-4da5-ab00-79bd93842e45"
+
+[multipart]
+q = """
+```ocaml
+type user = {
+  id : Uuid.t;
+  mutable last_active : float
+}
+
+let f1 : user -> int
+    = (* ... *)
+
+let f2 : (user @ contended) -> int
+    = (* ... *)
+
+let f3 : (user -> int) @ portable
+    = (* ... *)
+```
+
+You will be given a series of statements about the possible implementations of the functions `f1`, `f2`, and `f3`. For each statement select whether it is "true" or "false" based on the rules of contention and portability.
+"""
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f1` could modify its parameter"
+prompt.distractors = ["False"]
+prompt.answerIndex = 0
+answer.answer = "True"
+context = """
+The parameter is uncontended and no restrictions exist for uncontended references
+"""
+id = "4239f3fd-42d4-4a54-851d-96bc378b0aed"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f1` could not be portable because its parameter is uncontended"
+prompt.distractors = ["True"]
+prompt.answerIndex = 1
+answer.answer = "False"
+context = """
+There are no restrictions on the type of references a portable function accepts as parameters
+"""
+id = "8d59b19f-199e-447c-8e04-ec59601b4daa"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f2` can update the `last_active` field of its parameter"
+prompt.distractors = ["True"]
+prompt.answerIndex = 1
+answer.answer = "False"
+context = """
+Mutable fields of contended values cannot be read or written
+"""
+id = "148cd86e-1041-4ac9-8acd-2b3843652c84"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f2` can write to references it captures"
+prompt.distractors = ["False"]
+prompt.answerIndex = 0
+answer.answer = "True"
+context = """
+Nonportable functions can capture references as uncontended
+"""
+id = "6d41b029-ecc4-4fdf-9863-7388959d6481"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f2` can read the `id` field of its parameter"
+prompt.distractors = ["False"]
+prompt.answerIndex = 0
+answer.answer = "True"
+context = """
+Deeply immutable values mode cross along the contention axis.
+"""
+id = "81f7aef6-4d03-46af-b956-5cb0b2dacba5"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f3` can read from mutable fields of captured references"
+prompt.distractors = ["True"]
+prompt.answerIndex = 1
+answer.answer = "False"
+context = """
+References captured by portable functions are contended
+"""
+id = "a4dc0328-ab30-48dd-82af-fe3bef4bdb02"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f3` can only capture references as contended"
+prompt.distractors = ["False"]
+prompt.answerIndex = 0
+answer.answer = "True"
+context = """
+References captured by portable functions are contended
+"""
+id = "96ca95e1-eb27-40b2-9ea7-d21a863c8118"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f3` can update the `last_active` field of its parameter"
+prompt.distractors = ["False"]
+prompt.answerIndex = 0
+answer.answer = "True"
+context = """
+Uncontended values may be read and written to
+"""
+id = "f0ffcfb1-9085-4524-8b89-f25de948fc28"

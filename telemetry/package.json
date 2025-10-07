@@ -1,0 +1,41 @@
+{
+  "name": "telemetry",
+  "version": "0.1.0",
+  "files": [
+    "dist"
+  ],
+  "main": "dist/lib.js",
+  "exports": {
+    ".": {
+      "default": "./dist/lib.js"
+    },
+    "./*": {
+      "default": "./dist/*.js"
+    }
+  },
+  "type": "module",
+  "depot": {
+    "platform": "browser",
+    "target": "lib",
+    "depot-version": "0.3.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "rollup": "npm:@rollup/wasm-node"
+    }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.5",
+    "@types/node": "^24.7.0",
+    "jsdom": "^27.0.0",
+    "typedoc": "^0.28.13",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.9",
+    "vitest": "^3.2.4",
+    "axios": "^0.27.2",
+    "uuid": "^8.3.2"
+  },
+  "dependencies": {
+    "@types/uuid": "^8.3.4"
+  }
+}

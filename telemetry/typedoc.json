@@ -1,0 +1,10 @@
+{
+  "name": "telemetry",
+  "validation": {
+    "invalidLink": true,
+    "notExported": true
+  },
+  "entryPoints": [
+    "src/lib.ts"
+  ]
+}
