@@ -6,14 +6,9 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "outDir": "dist"
+    "noEmit": true
   },
   "include": [
     "src"
-  ],
-  "typedocOptions": {
-    "entryPoints": [
-      "./src/lib.ts"
-    ]
-  }
+  ]
 }
