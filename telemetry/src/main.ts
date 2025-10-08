@@ -31,11 +31,6 @@ export class Telemetry {
       return;
     }
 
-    let host = window.location.hostname;
-    // if (host === "localhost" && !this.url.includes("localhost")) {
-    //   return;
-    // }
-
     let log: Log<T> = {
       sessionId: this.sessionId,
       commitHash: this.commitHash,
