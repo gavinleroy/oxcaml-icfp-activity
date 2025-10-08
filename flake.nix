@@ -19,11 +19,11 @@
           pname = "tutorial-book";
           version = "0.1.0";
           src = pkgs.lib.cleanSource ./.;
-          buildInputs = with pkgs; [
+          nativeBuildInputs = with pkgs; [ 
+            cacert 
             pnpm_9
             nodejs_22
             depotjs
-            python3
             mdbookqz
             mdbook
           ];
