@@ -5,6 +5,6 @@ src = "src"
 title = "ICFP'25 OxCaml Tutorial Activities"
 
 [output.html]
-additional-js = ["telemetry/dist/index.js"]
+additional-js = ["telemetry/dist/telemetry.iife.js"]
 
 [preprocessor.quiz]
