@@ -15,6 +15,16 @@
         depotjs = depot-js.packages.${system}.default;
         mdbookqz = mdbook-quiz.packages.${system}.default;
 
+        push-to-pages = pkgs.writeScriptBin "push-to-pages" ''
+          cd telemetry && depot b --release && cd - && mdbook build &&
+          git checkout gh-pages &&
+          git rm -rf . && cp -R book/* . &&
+          git add . && git commit -m "Deploy book at $(date)" &&
+          git push origin gh-pages &&
+          git checkout main &&
+          echo "✅ Book deployed!"
+        '';
+
         activity-book = pkgs.stdenv.mkDerivation (finalAttrs: rec {
           pname = "tutorial-book";
           version = "0.1.0";
@@ -51,5 +61,17 @@
         });
       in {
         packages.default = activity-book;
+
+        devShell = with pkgs; mkShell {
+          buildInputs = with pkgs; [ 
+            cacert 
+            pnpm_9
+            nodejs_22
+            depotjs
+            mdbookqz
+            mdbook
+            push-to-pages
+          ];
+        };
       });
 }
