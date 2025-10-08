@@ -16,9 +16,9 @@
         mdbookqz = mdbook-quiz.packages.${system}.default;
 
         push-to-pages = pkgs.writeScriptBin "push-to-pages" ''
-          cd telemetry && depot b --release && cd - && mdbook build &&
+          cd telemetry && depot b --release && cd - && mdbook build -d out &&
           git checkout gh-pages &&
-          git rm -rf . && cp -R book/* . &&
+          git rm -rf . && cp -R out/* . && rm -rf out &&
           git add . && git commit -m "Deploy book at $(date)" &&
           git push origin gh-pages &&
           git checkout main &&
