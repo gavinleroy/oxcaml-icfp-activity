@@ -15,10 +15,11 @@
         depotjs = depot-js.packages.${system}.default;
         mdbookqz = mdbook-quiz.packages.${system}.default;
 
-        activity-book = pkgs.stdenv.mkDerivation {
+        activity-book = pkgs.stdenv.mkDerivation (finalAttrs: rec {
           pname = "tutorial-book";
           version = "0.1.0";
           src = pkgs.lib.cleanSource ./.;
+
           nativeBuildInputs = with pkgs; [ 
             cacert 
             pnpm_9
@@ -27,7 +28,19 @@
             mdbookqz
             mdbook
           ];
+
+          pnpmRoot = "telemetry";
+          pnpmDeps = pkgs.pnpm_9.fetchDeps {
+            inherit (finalAttrs) pname version src;
+            fetcherVersion = 2;
+            hash = "sha256-IU01f2iit4SjgHt6pKdGRxdgsVHobCwf5zQ/8JyOhn4=";
+            sourceRoot = "${finalAttrs.src.name}/${pnpmRoot}";
+          };
+
           buildPhase = ''
+            export PNPM_WRITABLE_STORE=$(mktemp -d)
+            cp -r ${pnpmDeps}/.* $PNPM_WRITABLE_STORE/ || true
+            export npm_config_store_dir=$PNPM_WRITABLE_STORE
             cd telemetry && depot b --release && cd ..
             mdbook build
           '';
@@ -35,7 +48,7 @@
             mkdir -p $out
             cp -R book/* $out
           '';
-        };
+        });
       in {
         packages.default = activity-book;
       });
