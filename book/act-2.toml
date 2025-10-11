@@ -1,0 +1,285 @@
+[multipart]
+q = """
+```ocaml
+type user = {
+  id : Uuid.t;
+  mutable last_active : float
+}
+
+let f1 : user -> int
+    = (* ... *)
+
+let f2 : (user @ contended) -> int
+    = (* ... *)
+
+let f3 : (user -> int) @ portable
+    = (* ... *)
+```
+
+You will be given a series of statements about the possible implementations of the functions `f1`, `f2`, and `f3`. For each statement select whether it is "true" or "false" based on the rules of contention and portability.
+"""
+unique = """
+Earlier you saw examples of the locality, contention, and portability mode axes, but there are many more! Let's think about the design of a new mode axis, the uniqueness axis:
+
+The uniqueness axis will have two modes: unique, and aliased. The property of a unique value is that exactly one reference exists.
+"""
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "unique"
+prompt.prompt = """
+Every OCaml value has a default mode, which should be the default for the uniqueness axis?
+"""
+prompt.distractors = ["unique"]
+prompt.answerIndex = 0
+answer.answer = "aliased"
+context = """
+OCaml values are often referenced many times and we can't make any assumptions about references that exist in wild OCaml code.
+"""
+id = "30259bfc-e406-41d1-8102-bf8b1e945aa9"
+
+[[questions]]
+type = "ShortAnswer"
+multipart = "unique"
+prompt.prompt = """
+Write the submoding relationship between the modes `unique` and `aliased`.
+
+> Note, use the same syntax as earlier, e.g., `global < local` for locality.
+"""
+answer.answer = "unique < aliased"
+context = """
+It is safe to use a unique value as aliased, but not the other way around. One optimization of uniqueness is that the compiler could reuse unique memory, but if that memory is aliased, then someone's (potentially) immutable data just unexpectedly changed!
+"""
+id = "0e38cf96-0eb3-4346-92d8-962331f926c9"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "unique"
+prompt.prompt = """
+There are several possible semantics for using unique values. In this question, assume that functions that take a unique argument, *consume* the only reference to that value. This decision allows us to implement memory free operations for externally allocated data structures.
+
+Assuming the following functions exist
+
+```ocaml
+val fst : ('a * 'b) @ aliased -> 'a @ aliased
+
+val free : 'a @ unique -> unit
+```
+
+Select all the implementations of the function foo that are safe to run:
+"""
+prompt.distractors = ["""
+  ```ocaml
+  let foo t =
+    free t; 
+    let f1 = fst t in
+    let f2 = fst t in
+    Stdio.print_endline f1; 
+    Stdio.print_endline f2 
+  ```
+  """, """
+  ```ocaml
+  let foo t =
+    let f1 = fst t in
+    let f2 = fst t in
+    Stdio.print_endline f1; 
+    Stdio.print_endline f2; 
+    free t 
+  ```
+  """, """
+  ```ocaml
+  let foo t =
+    let f1 = fst t in
+    Stdio.print_endline f1; 
+    free t 
+  ```
+  """]
+answer.answer = ["""
+  ```ocaml
+  let foo t =
+    if true then 
+      free t
+    else begin
+      let f1 = fst t in 
+      let f2 = fst t in 
+      Stdio.print_endline f1;
+      Stdio.print_endline f2
+    end
+  ```
+  """, """
+  ```ocaml
+  let foo t =
+    let f1 = fst t in
+    Stdio.print_endline f1 
+  ```
+  """]
+id = "1723f2bc-960a-472d-a6e1-f97eec8c8cf0"
+
+[[questions]]
+type = "MultipleChoice"
+prompt.prompt = """
+```ocaml
+type user = {
+  id : Uuid.t;
+  mutable last_active : float
+}
+```
+
+Provided the above definition of the `user` type, select all of the programs that type check, or "None of the above."
+"""
+prompt.distractors = ["""
+  ```ocaml
+  let foo (users : user array @ contended) =
+    users.(0)
+  ```
+  """, """
+  ```ocaml
+  let foo (users : user array @ contended) =
+    users.(0).last_active
+  ```
+  """, """
+  ```ocaml
+  let foo (users : user array @ contended) =
+    users.(0).id
+  ```
+  """, """
+  ```ocaml
+  let foo (users : user array @ contended) =
+    users.(0) <- { id = id; last_active = Unix.time () }
+  ```
+  """, """
+  ```ocaml
+  let foo (users : user array @ contended) =
+    users.(0).last_active <- Unix.time ()
+  ```
+  """]
+prompt.answerIndex = 5
+answer.answer = ["None of the above"]
+context = """
+Array elements are mutable places, thus elements of a contended array cannot be *read or written*
+"""
+id = "2df5cc1b-82c6-47d0-82ea-b7bc237b9d85"
+
+[[questions]]
+type = "MultipleChoice"
+prompt.prompt = """
+```ocaml
+let make_box s = exclave_
+  ref s
+
+let () = 
+  let ls = [ ref 0 ] in
+  let ls @ local = stack_ (make_box 1 :: ls)  in
+  (* here *)
+  ...
+```
+
+Select which diagram best represents the memory while executing the line marked `(* here *)`
+"""
+prompt.distractors = [
+  "![Maybe answer](assets/q2-memory-b.svg)",
+  "![Maybe answer](assets/q2-memory-c.svg)",
+  "![Maybe answer](assets/q2-memory-d.svg)",
+]
+answer.answer = "![Maybe answer](assets/q2-memory-a.svg)"
+context = """
+The expression `[ ref 0 ]` is not stack allocated.
+"""
+id = "619274ba-08ad-4236-8874-d0023ebc631e"
+
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f1` could modify its parameter"
+prompt.distractors = ["False"]
+prompt.answerIndex = 0
+answer.answer = "True"
+context = """
+The parameter is uncontended and no restrictions exist for uncontended references
+"""
+id = "583663ba-347b-406d-89ba-a6d47d582b91"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f1` could not be portable because its parameter is uncontended"
+prompt.distractors = ["True"]
+prompt.answerIndex = 1
+answer.answer = "False"
+context = """
+There are no restrictions on the type of references a portable function accepts as parameters
+"""
+id = "9e1ce845-82c2-4dbe-8ace-0933ecedf4e7"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f2` can update the `last_active` field of its parameter"
+prompt.distractors = ["True"]
+prompt.answerIndex = 1
+answer.answer = "False"
+context = """
+Mutable fields of contended values cannot be read or written
+"""
+id = "3cb44168-a78b-4f40-92d6-942eebae7a10"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f2` can write to references it captures"
+prompt.distractors = ["False"]
+prompt.answerIndex = 0
+answer.answer = "True"
+context = """
+Nonportable functions can capture references as uncontended
+"""
+id = "56fb30d9-175a-4884-bf23-146c459db16a"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f2` can read the `id` field of its parameter"
+prompt.distractors = ["False"]
+prompt.answerIndex = 0
+answer.answer = "True"
+context = """
+Deeply immutable values mode cross along the contention axis.
+"""
+id = "a9c3b558-bcb0-4e99-99d7-027c4ef2ecd3"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f3` can read from mutable fields of captured references"
+prompt.distractors = ["True"]
+prompt.answerIndex = 1
+answer.answer = "False"
+context = """
+References captured by portable functions are contended
+"""
+id = "06769b4a-b030-4022-a948-2ef56993614e"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f3` can only capture references as contended"
+prompt.distractors = ["False"]
+prompt.answerIndex = 0
+answer.answer = "True"
+context = """
+References captured by portable functions are contended
+"""
+id = "5a5c134c-a831-421c-ad9d-3a2a4a20dd29"
+
+[[questions]]
+type = "MultipleChoice"
+multipart = "q"
+prompt.prompt = "The implementation of `f3` can update the `last_active` field of its parameter"
+prompt.distractors = ["False"]
+prompt.answerIndex = 0
+answer.answer = "True"
+context = """
+Uncontended values may be read and written to
+"""
+id = "e7e22a6b-7ffa-45d4-b5ac-35112e1630a7"
