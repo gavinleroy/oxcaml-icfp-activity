@@ -7,13 +7,29 @@
     mdbook-quiz.url = "github:cognitive-engineering-lab/mdbook-quiz";
   };
 
-  outputs = { self, nixpkgs, flake-utils, rust-overlay, depot-js, mdbook-quiz }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let 
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      rust-overlay,
+      depot-js,
+      mdbook-quiz,
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
         overlays = [ (import rust-overlay) ];
-        pkgs = import nixpkgs { inherit system overlays; }; 
+        pkgs = import nixpkgs { inherit system overlays; };
         depotjs = depot-js.packages.${system}.default;
         mdbookqz = mdbook-quiz.packages.${system}.default;
+
+        sbclWithDeps = pkgs.sbcl.withPackages (
+          ps: with ps; [
+            drakma
+            lparallel
+          ]
+        );
 
         push-to-pages = pkgs.writeScriptBin "push-to-pages" ''
           cd telemetry && depot b --release && cd - && mdbook build -d out &&
@@ -30,8 +46,8 @@
           version = "0.1.0";
           src = pkgs.lib.cleanSource ./.;
 
-          nativeBuildInputs = with pkgs; [ 
-            cacert 
+          nativeBuildInputs = with pkgs; [
+            cacert
             pnpm_9
             nodejs_22
             depotjs
@@ -59,19 +75,25 @@
             cp -R book/* $out
           '';
         });
-      in {
+      in
+      {
         packages.default = activity-book;
 
-        devShell = with pkgs; mkShell {
-          buildInputs = with pkgs; [ 
-            cacert 
-            pnpm_9
-            nodejs_22
-            depotjs
-            mdbookqz
-            mdbook
-            push-to-pages
-          ];
-        };
-      });
+        devShell =
+          with pkgs;
+          mkShell {
+            buildInputs = with pkgs; [
+              cacert
+              pnpm_9
+              nodejs_22
+              depotjs
+              mdbookqz
+              mdbook
+              julia-bin
+              sbclWithDeps
+              push-to-pages
+            ];
+          };
+      }
+    );
 }
