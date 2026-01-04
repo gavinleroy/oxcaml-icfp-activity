@@ -24,13 +24,6 @@
         depotjs = depot-js.packages.${system}.default;
         mdbookqz = mdbook-quiz.packages.${system}.default;
 
-        sbclWithDeps = pkgs.sbcl.withPackages (
-          ps: with ps; [
-            drakma
-            lparallel
-          ]
-        );
-
         push-to-pages = pkgs.writeScriptBin "push-to-pages" ''
           cd telemetry && depot b --release && cd - && mdbook build -d out &&
           git checkout gh-pages &&
@@ -41,43 +34,65 @@
           echo "✅ Book deployed!"
         '';
 
-        activity-book = pkgs.stdenv.mkDerivation (finalAttrs: rec {
-          pname = "tutorial-book";
-          version = "0.1.0";
-          src = pkgs.lib.cleanSource ./.;
-
-          nativeBuildInputs = with pkgs; [
-            cacert
-            pnpm_9
-            nodejs_22
-            depotjs
-            mdbookqz
-            mdbook
-          ];
-
-          pnpmRoot = "telemetry";
-          pnpmDeps = pkgs.pnpm_9.fetchDeps {
-            inherit (finalAttrs) pname version src;
-            fetcherVersion = 2;
-            hash = "sha256-IU01f2iit4SjgHt6pKdGRxdgsVHobCwf5zQ/8JyOhn4=";
-            sourceRoot = "${finalAttrs.src.name}/${pnpmRoot}";
-          };
-
-          buildPhase = ''
-            export PNPM_WRITABLE_STORE=$(mktemp -d)
-            cp -r ${pnpmDeps}/.* $PNPM_WRITABLE_STORE/ || true
-            export npm_config_store_dir=$PNPM_WRITABLE_STORE
-            cd telemetry && depot b --release && cd ..
-            mdbook build
-          '';
-          installPhase = ''
-            mkdir -p $out
-            cp -R book/* $out
-          '';
-        });
+        guile = pkgs.guile_3_0;
+        server-deps = [ pkgs.guile-fibers ];
       in
       {
-        packages.default = activity-book;
+        packages = {
+          oxserver = pkgs.stdenv.mkDerivation {
+            name = "oxserver";
+            # nix will copy the whole repo (including scripts/) into the build environment
+            src = ./.;
+            nativeBuildInputs = [ pkgs.makeWrapper ];
+            buildInputs = [ guile ] ++ server-deps;
+            installPhase = ''
+              mkdir -p $out/bin $out/share/guile/site
+              cp scripts/oxserver.scm $out/share/guile/site/
+              makeWrapper ${guile}/bin/guile $out/bin/oxserver \
+              --add-flags "-l $out/share/guile/site/oxserver.scm" \
+              --add-flags "-c '((@ (oxserver) main))'" \
+              --prefix GUILE_LOAD_PATH : "$out/share/guile/site:${pkgs.lib.makeSearchPath "share/guile/site/3.0" server-deps}" \
+              --prefix GUILE_LOAD_COMPILED_PATH : "${pkgs.lib.makeSearchPath "lib/guile/3.0/site-ccache" server-deps}"
+            '';
+          };
+
+          activity-book = pkgs.stdenv.mkDerivation (finalAttrs: rec {
+            pname = "tutorial-book";
+            version = "0.1.0";
+            src = pkgs.lib.cleanSource ./.;
+
+            nativeBuildInputs = with pkgs; [
+              cacert
+              pnpm_9
+              nodejs_22
+              depotjs
+              mdbookqz
+              mdbook
+            ];
+
+            pnpmRoot = "telemetry";
+            pnpmDeps = pkgs.pnpm_9.fetchDeps {
+              inherit (finalAttrs) pname version src;
+              fetcherVersion = 2;
+              hash = "sha256-IU01f2iit4SjgHt6pKdGRxdgsVHobCwf5zQ/8JyOhn4=";
+              sourceRoot = "${finalAttrs.src.name}/${pnpmRoot}";
+            };
+
+            buildPhase = ''
+              export PNPM_WRITABLE_STORE=$(mktemp -d)
+              cp -r ${pnpmDeps}/.* $PNPM_WRITABLE_STORE/ || true
+              export npm_config_store_dir=$PNPM_WRITABLE_STORE
+              cd telemetry && depot b --release && cd ..
+              mdbook build
+            '';
+            installPhase = ''
+              mkdir -p $out
+              cp -R book/* $out
+            '';
+          });
+
+          default = self.packages.${system}.activity-book;
+        };
 
         devShell =
           with pkgs;
@@ -90,7 +105,9 @@
               mdbookqz
               mdbook
               julia-bin
-              sbclWithDeps
+              guile
+              guile-fibers
+              wrk
               push-to-pages
             ];
           };
