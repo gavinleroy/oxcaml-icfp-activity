@@ -56,7 +56,7 @@
 (defun read-body-to-vector (env)
   (let ((content-len (getf env :content-length))
         (stream (getf env :raw-body)))
-    (when (and content-len (0 < content-len))
+    (when (and content-len (< 0 content-len))
       (let* ((buffer (get-buffer content-len))
              (bytes-read (read-sequence buffer stream :end content-len)))
         (make-log-entry :data buffer :length bytes-read)))))
@@ -89,5 +89,5 @@
   (woo:run #'handle-request 
            :address "0.0.0.0"
            :port port
-           ;:debug nil 
+           :debug nil 
            :worker-num 2)) ;; FIXME: dynamically load this?

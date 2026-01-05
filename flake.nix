@@ -38,7 +38,7 @@
       in
       {
         packages = {
-          oxserver = pkgs.stdenv.mkDerivation {
+          oxserver = pkgs.stdenv.mkDerivation rec {
             pname = "oxserver";
             version = "1.0.0";
             src = ./.;
@@ -46,7 +46,7 @@
               sbclWithDeps
               pkgs.makeWrapper
             ];
-            buildInputs = [ pkgs.libev ];
+            buildInputs = with pkgs; [ libev openssl ];
             dontStrip = true;
             buildPhase = ''
               cat > build-script.lisp <<EOF
@@ -65,7 +65,7 @@
               mkdir -p $out/bin
               cp oxserver $out/bin/
               wrapProgram $out/bin/oxserver \
-              --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath [ pkgs.libev ]}"
+              --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath buildInputs}"
             '';
           };
 
