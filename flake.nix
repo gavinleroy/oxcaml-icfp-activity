@@ -34,25 +34,38 @@
           echo "✅ Book deployed!"
         '';
 
-        guile = pkgs.guile_3_0;
-        server-deps = [ pkgs.guile-fibers ];
+        sbclWithDeps = pkgs.sbcl.withPackages (ps: with ps; [ woo ]);
       in
       {
         packages = {
           oxserver = pkgs.stdenv.mkDerivation {
-            name = "oxserver";
-            # nix will copy the whole repo (including scripts/) into the build environment
+            pname = "oxserver";
+            version = "1.0.0";
             src = ./.;
-            nativeBuildInputs = [ pkgs.makeWrapper ];
-            buildInputs = [ guile ] ++ server-deps;
+            nativeBuildInputs = [
+              sbclWithDeps
+              pkgs.makeWrapper
+            ];
+            buildInputs = [ pkgs.libev ];
+            dontStrip = true;
+            buildPhase = ''
+              cat > build-script.lisp <<EOF
+              (require :sb-concurrency)
+              (require :asdf)
+              (asdf:load-system :woo)
+              (load "scripts/oxserver.lisp")
+              (sb-ext:save-lisp-and-die "oxserver"
+                :toplevel #'oxserver:main
+                :executable t
+                :compression t)
+              EOF
+              sbcl --load build-script.lisp
+            '';
             installPhase = ''
-              mkdir -p $out/bin $out/share/guile/site
-              cp scripts/oxserver.scm $out/share/guile/site/
-              makeWrapper ${guile}/bin/guile $out/bin/oxserver \
-              --add-flags "-l $out/share/guile/site/oxserver.scm" \
-              --add-flags "-c '((@ (oxserver) main))'" \
-              --prefix GUILE_LOAD_PATH : "$out/share/guile/site:${pkgs.lib.makeSearchPath "share/guile/site/3.0" server-deps}" \
-              --prefix GUILE_LOAD_COMPILED_PATH : "${pkgs.lib.makeSearchPath "lib/guile/3.0/site-ccache" server-deps}"
+              mkdir -p $out/bin
+              cp oxserver $out/bin/
+              wrapProgram $out/bin/oxserver \
+              --prefix LD_LIBRARY_PATH : "${pkgs.lib.makeLibraryPath [ pkgs.libev ]}"
             '';
           };
 
@@ -105,8 +118,7 @@
               mdbookqz
               mdbook
               julia-bin
-              guile
-              guile-fibers
+              sbclWithDeps
               wrk
               push-to-pages
             ];
