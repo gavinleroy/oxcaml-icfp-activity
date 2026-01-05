@@ -34,7 +34,19 @@
           echo "✅ Book deployed!"
         '';
 
-        sbclWithDeps = pkgs.sbcl.withPackages (ps: with ps; [ woo ]);
+        sbclServer = pkgs.sbcl.withPackages (
+          ps: with ps; [
+            woo
+            cl-cpus
+          ]
+        );
+        sbclTest = pkgs.sbcl.withPackages (
+          ps: with ps; [
+            woo
+            cl-cpus
+            dexador
+          ]
+        );
       in
       {
         packages = {
@@ -43,16 +55,20 @@
             version = "1.0.0";
             src = ./.;
             nativeBuildInputs = [
-              sbclWithDeps
+              sbclServer
               pkgs.makeWrapper
             ];
-            buildInputs = with pkgs; [ libev openssl ];
+            buildInputs = with pkgs; [
+              libev
+              openssl
+            ];
             dontStrip = true;
             buildPhase = ''
               cat > build-script.lisp <<EOF
               (require :sb-concurrency)
               (require :asdf)
               (asdf:load-system :woo)
+              (asdf:load-system :cl-cpus)
               (load "scripts/oxserver.lisp")
               (sb-ext:save-lisp-and-die "oxserver"
                 :toplevel #'oxserver:main
@@ -118,7 +134,7 @@
               mdbookqz
               mdbook
               julia-bin
-              sbclWithDeps
+              sbclTest
               wrk
               push-to-pages
             ];

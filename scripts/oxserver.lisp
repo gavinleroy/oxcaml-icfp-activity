@@ -4,10 +4,6 @@
 
 (in-package :oxserver)
 
-;;; ----------------------------------------------------------------------------
-;;; Configuration & Globals
-;;; ----------------------------------------------------------------------------
-
 (defvar *log-file* (or (uiop:getenv "OXSERVER_LOG_FILE") "responses.txt"))
 
 (defconstant +buffer-size+ 4096)
@@ -78,10 +74,6 @@
       (t
        `(404 ,*cors-headers* ("whoops, not found"))))))
 
-;;; ----------------------------------------------------------------------------
-;;; Main Entry Point
-;;; ----------------------------------------------------------------------------
-
 (defun main (&optional (port 8080))
   (format t "Starting Logger Thread...~%")
   (start-logger-thread)
@@ -90,4 +82,4 @@
            :address "0.0.0.0"
            :port port
            :debug nil 
-           :worker-num 2)) ;; FIXME: dynamically load this?
+           :worker-num (cpus:get-number-of-processors)))
