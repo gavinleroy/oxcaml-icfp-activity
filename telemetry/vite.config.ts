@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
   define: {
     TELEMETRY_URL: JSON.stringify("https://oxcaml-tutorial.gavinleroy.com"),
     BRANCH: JSON.stringify("main"),
-    COMMIT_HASH: JSON.stringify("dca112bebdbd121bb2545c47304ccefa74dd83d1"),
+    COMMIT_HASH: JSON.stringify("d4c2bc57dad4a44d08e66a99a0b8a2ed7aa3137e"),
     "process.env.NODE_ENV": JSON.stringify(mode)
   },
   test: {
