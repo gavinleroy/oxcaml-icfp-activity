@@ -1,4 +1,4 @@
-name: publish
+name: Deploy Book
 
 on:
   push:
@@ -6,21 +6,28 @@ on:
       - main
 
 jobs:
-  tutorial:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout source
+        uses: actions/checkout@v4
 
-      - uses: DeterminateSystems/nix-installer-action@main
-      - uses: DeterminateSystems/flakehub-cache-action@main
-      - uses: DeterminateSystems/flake-checker-action@main
+      - name: Install Nix
+        uses: cachix/install-nix-action@v30
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Tutorial
-        run: nix build .#
+      - name: Magic Nix Cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
 
-      # - uses: JamesIves/github-pages-deploy-action@v4.3.0
-      #   with:
-      #     token: ${{ secrets.GITHUB_TOKEN }}
-      #     branch: gh-pages
-      #     folder: ./result
-      #     clean: true
+      - name: Build the Book
+        run: nix build .#activity-book -L
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./result
+          force_orphan: true
