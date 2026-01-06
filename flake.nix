@@ -19,7 +19,11 @@
       let
         pkgs = import nixpkgs { inherit system; };
         depotjs = depot-js.packages.${system}.default;
-        mdbookqz = mdbook-quiz.packages.${system}.default;
+        mdbookqz = mdbook-quiz.packages.${system}.default.override {
+          enableSourceMap = true;
+          enableRustEditor = false;
+          enableAquascope = false;
+        };
 
         push-to-pages = pkgs.writeScriptBin "push-to-pages" ''
           set -euo pipefail
@@ -93,13 +97,6 @@
             cl-cpus
           ]
         );
-        sbclTest = pkgs.sbcl.withPackages (
-          ps: with ps; [
-            woo
-            cl-cpus
-            dexador
-          ]
-        );
 
         oxserver = pkgs.stdenv.mkDerivation rec {
           pname = "oxserver";
@@ -155,7 +152,7 @@
 
               julia-bin
 
-              sbclTest
+              sbclServer
               libev
               openssl
               wrk

@@ -1,8 +1,6 @@
 #!/usr/bin/sbcl --script
 
 (require :uiop)
-(require :asdf)
-(asdf:load-system :dexador)
 
 (defparameter *concurrency-levels* '(100 500 1000 5000))
 

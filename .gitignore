@@ -1,5 +1,6 @@
-book
+book/book
 mdbook-quiz
 dist
 .aquascope-cache
 .direnv
+result
