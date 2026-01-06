@@ -169,7 +169,7 @@ let make_box s = exclave_
 
 let () = 
   let ls = [ ref 0 ] in
-  let ls @ local = stack_ (make_box 1 :: ls)  in
+  let ls = stack_ (make_box 1 :: ls)  in
   (* here *)
   ...
 ```
@@ -177,13 +177,13 @@ let () =
 Select which diagram best represents the memory while executing the line marked `(* here *)`
 """
 prompt.distractors = [
-  "![Maybe answer](assets/q2-memory-b.svg)",
+  "![Maybe answer](assets/q2-memory-a.svg)",
   "![Maybe answer](assets/q2-memory-c.svg)",
   "![Maybe answer](assets/q2-memory-d.svg)",
 ]
-answer.answer = "![Maybe answer](assets/q2-memory-a.svg)"
+answer.answer = "![Maybe answer](assets/q2-memory-b.svg)"
 context = """
-The expression `[ ref 0 ]` is not stack allocated.
+OxCaml will infer that the expression `[ ref 0 ]` can be locally allocated.
 """
 id = "619274ba-08ad-4236-8874-d0023ebc631e"
 

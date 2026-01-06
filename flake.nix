@@ -133,9 +133,14 @@
               depotjs
               mdbookqz
               mdbook
+
               julia-bin
+
               sbclTest
+              libev
+              openssl
               wrk
+
               push-to-pages
             ];
           };
