@@ -119,11 +119,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1767730509,
-        "narHash": "sha256-cRXOlJUioh6RdprXZRTsr4rZtZ1+qKBoygJwZ732Apg=",
+        "lastModified": 1767867296,
+        "narHash": "sha256-HU+++EiZMubW5h1UOqqt/mzP9E5bD3IfoedZJ8rR6Hw=",
         "owner": "cognitive-engineering-lab",
         "repo": "mdbook-quiz",
-        "rev": "2e596ff080078bba349ca7ec9a9a37ede1e5a51d",
+        "rev": "f64f77cae42ff8017f829e378dd4dde8be71299d",
         "type": "github"
       },
       "original": {

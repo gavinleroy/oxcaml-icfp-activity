@@ -55,8 +55,9 @@
 
           buildPhase = ''
             set -euo pipefail
+            export NPM_CONFIG_OFFLINE=true
             export PNPM_WRITABLE_STORE=$(mktemp -d)
-            cp -r ${finalAttrs.pnpmDeps}/. $PNPM_WRITABLE_STORE
+            cp -LR ${finalAttrs.pnpmDeps}/* $PNPM_WRITABLE_STORE/ || true
             chmod -R +w $PNPM_WRITABLE_STORE
             export npm_config_store_dir=$PNPM_WRITABLE_STORE
             depot b --release
