@@ -44,7 +44,9 @@
                  (write-sequence (log-entry-data msg) stream :end (log-entry-length msg))
                  (write-byte #x0A stream)
                  (force-output stream)
-                 (release-buffer (log-entry-data msg)))))))
+                 (release-buffer (log-entry-data msg)))
+               (otherwise 
+                 (format *error-output* "unknown msg ~a~%" msg))))))
 
 (defun start-logger-thread ()
   (sb-thread:make-thread #'logger :name "logger-thread"))
@@ -75,11 +77,16 @@
        `(404 ,*cors-headers* ("whoops, not found"))))))
 
 (defun main (&optional (port 8080))
-  (format t "Starting Logger Thread...~%")
-  (start-logger-thread)
-  (format t "Starting Server on 0.0.0.0:~a...~%" port)
-  (woo:run #'handle-request 
-           :address "0.0.0.0"
-           :port port
-           :debug nil 
-           :worker-num (cpus:get-number-of-processors)))
+  (let ((logger-thread (start-logger-thread)))
+    (format *error-output* "listening on 0.0.0.0:~a...~%" port)
+    (handler-case 
+        (woo:run #'handle-request 
+                :address "0.0.0.0"
+                :port port
+                :debug nil 
+                :worker-num (cpus:get-number-of-processors))
+      (sb-sys:interactive-interrupt ()
+        (progn 
+          (format *error-output* "bye bye" port)
+          (sb-concurrency:send-message *log-queue* :stop)
+          (sb-thread:join-thread logger-thread))))))
