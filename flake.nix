@@ -25,17 +25,6 @@
           enableAquascope = false;
         };
 
-        push-to-pages = pkgs.writeScriptBin "push-to-pages" ''
-          set -euo pipefail
-          cd telemetry && depot b --release && cd - && mdbook build -d out &&
-          git checkout gh-pages &&
-          git rm -rf . && cp -R out/* . && rm -rf out &&
-          git add . && git commit -m "Deploy book at $(date)" &&
-          git push origin gh-pages &&
-          git checkout main &&
-          echo "✅ Book deployed!"
-        '';
-
         telemetry-pkg = pkgs.stdenv.mkDerivation (finalAttrs: {
           pname = "telemetry";
           version = "0.1.0";
@@ -157,8 +146,6 @@
               libev
               openssl
               wrk
-
-              push-to-pages
             ];
           };
       }
