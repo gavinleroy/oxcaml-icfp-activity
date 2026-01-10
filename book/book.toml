@@ -2,7 +2,7 @@
 authors = ["gavinleroy"]
 language = "en"
 src = "src"
-title = "ICFP'25 OxCaml Tutorial Activities"
+title = "OxCaml Workshop Activities"
 
 [output.html]
 additional-js = ["telemetry/dist/telemetry.iife.js"]
