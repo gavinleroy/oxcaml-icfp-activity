@@ -1,3 +1,3 @@
-# OxCaml Tutorial Activity
+# OxCaml Workshop Activity
 
 {{#quiz ./act-2.toml}}
