@@ -22,8 +22,8 @@ jobs:
       - name: Magic Nix Cache
         uses: DeterminateSystems/magic-nix-cache-action@main
 
-      - name: Build the Book
-        run: nix build .#activity-book -L
+      - name: Build the Website
+        run: nix build .#website -L
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
