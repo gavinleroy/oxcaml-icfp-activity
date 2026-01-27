@@ -1,16 +1,16 @@
 {
   "nodes": {
-    "depot-js": {
+    "depot": {
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1741967107,
-        "narHash": "sha256-SqyJFsiqijoJTKmtpVeInvuhPKBqIZThuXXKqs6YXOI=",
+        "lastModified": 1769479145,
+        "narHash": "sha256-UdN0/6JO4VjqzsSnRabM7StGoYkJFOIBJanRvPgdXSg=",
         "owner": "cognitive-engineering-lab",
         "repo": "depot",
-        "rev": "3676b134767aba6a951ed5fdaa9e037255921475",
+        "rev": "934e910816df911049a621d21a68c1d41fd29bff",
         "type": "github"
       },
       "original": {
@@ -19,7 +19,7 @@
         "type": "github"
       }
     },
-    "depot-js_2": {
+    "depot-js": {
       "inputs": {
         "flake-utils": "flake-utils_3",
         "nixpkgs": "nixpkgs_2"
@@ -113,7 +113,7 @@
     },
     "mdbook-quiz": {
       "inputs": {
-        "depot-js": "depot-js_2",
+        "depot-js": "depot-js",
         "flake-utils": "flake-utils_4",
         "nixpkgs": "nixpkgs_3",
         "rust-overlay": "rust-overlay"
@@ -134,16 +134,15 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1741851582,
-        "narHash": "sha256-cPfs8qMccim2RBgtKGF+x9IBCduRvd/N5F4nYpU0TVE=",
+        "lastModified": 1769385949,
+        "narHash": "sha256-SRQaiH9ckO3I/4kGHJSepJl/R0RqdyycdBnnlQ5saKY=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "6607cf789e541e7873d40d3a8f7815ea92204f32",
+        "rev": "b3ac5a8a8ca2e8a57b387b1dda5e790132afdd8c",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -214,7 +213,7 @@
     },
     "root": {
       "inputs": {
-        "depot-js": "depot-js",
+        "depot": "depot",
         "flake-utils": "flake-utils_2",
         "mdbook-quiz": "mdbook-quiz",
         "nixpkgs": "nixpkgs_5"

@@ -2,7 +2,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    depot-js.url = "github:cognitive-engineering-lab/depot";
+    depot.url = "github:cognitive-engineering-lab/depot";
     mdbook-quiz.url = "github:cognitive-engineering-lab/mdbook-quiz";
   };
 
@@ -11,52 +11,28 @@
       self,
       nixpkgs,
       flake-utils,
-      depot-js,
+      depot,
       mdbook-quiz,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = import nixpkgs { inherit system; };
-        depotjs = depot-js.packages.${system}.default;
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ depot.overlays.default ];
+        };
         mdbookqz = mdbook-quiz.packages.${system}.default.override {
           enableSourceMap = true;
           enableRustEditor = false;
           enableAquascope = false;
         };
 
-        telemetry-pkg = pkgs.stdenv.mkDerivation (finalAttrs: {
+        telemetry-pkg = pkgs.mkDepotPackage {
           pname = "telemetry";
           version = "0.1.0";
           src = pkgs.lib.cleanSource ./telemetry;
-          nativeBuildInputs = with pkgs; [
-            cacert
-            pnpm_9
-            nodejs_22
-            depotjs
-          ];
-
-          pnpmDeps = pkgs.pnpm_9.fetchDeps {
-            inherit (finalAttrs) pname version src;
-            fetcherVersion = 2;
-            hash = "sha256-IU01f2iit4SjgHt6pKdGRxdgsVHobCwf5zQ/8JyOhn4=";
-          };
-
-          buildPhase = ''
-            set -euo pipefail
-            export NPM_CONFIG_OFFLINE=true
-            export PNPM_WRITABLE_STORE=$(mktemp -d)
-            cp -LR ${finalAttrs.pnpmDeps}/* $PNPM_WRITABLE_STORE/ || true
-            chmod -R +w $PNPM_WRITABLE_STORE
-            export npm_config_store_dir=$PNPM_WRITABLE_STORE
-            depot b --release
-          '';
-
-          installPhase = ''
-            mkdir -p $out
-            cp -r dist/* $out/ 
-          '';
-        });
+          pnpmHash = "sha256-IU01f2iit4SjgHt6pKdGRxdgsVHobCwf5zQ/8JyOhn4=";
+        };
 
         activity-book = pkgs.stdenv.mkDerivation {
           pname = "activity-book";
@@ -188,25 +164,15 @@
           default = activity-book;
         };
 
-        devShell =
-          with pkgs;
-          pkgs.mkShell {
-            buildInputs = [
-              cacert
-              pnpm_9
-              nodejs_22
-              depotjs
-              mdbookqz
-              mdbook
-
-              juliaEnv
-
-              sbclServer
-              libev
-              openssl
-              wrk
-            ];
-          };
+        devShell = pkgs.mkShell {
+          inputsFrom = [
+            telemetry-pkg
+            activity-book
+            analysis
+            oxserver
+          ];
+          buildInputs = [ pkgs.wrk ];
+        };
       }
     );
 }
