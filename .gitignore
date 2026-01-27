@@ -3,4 +3,5 @@ mdbook-quiz
 dist
 .aquascope-cache
 .direnv
+.envrc
 result
